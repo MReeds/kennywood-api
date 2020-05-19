@@ -1,11 +1,10 @@
-"""View module for handling requests about park areas"""
+"""Park Areas for Kennywood Amusement Park"""
 from django.http import HttpResponseServerError
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import serializers
 from rest_framework import status
-from kennywoodapi.models import ParkArea, Attraction
-from .attraction import AttractionSerializer
+from kennywoodapi.models import ParkArea
 
 
 class ParkAreaSerializer(serializers.HyperlinkedModelSerializer):
@@ -14,22 +13,13 @@ class ParkAreaSerializer(serializers.HyperlinkedModelSerializer):
     Arguments:
         serializers
     """
-    attractions = serializers.HyperlinkedRelatedField(
-        queryset=Attraction.objects.all(),
-        view_name="attraction-detail",
-        many=True,
-        required=False,
-        lookup_field="pk"
-    )
-
     class Meta:
         model = ParkArea
         url = serializers.HyperlinkedIdentityField(
             view_name='parkarea',
             lookup_field='id'
         )
-        fields = ('id', 'url', 'name', 'theme', 'attractions')
-        depth = 1
+        fields = ('id', 'url', 'name', 'theme')
 
 
 class ParkAreas(ViewSet):
@@ -77,7 +67,7 @@ class ParkAreas(ViewSet):
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
     def destroy(self, request, pk=None):
-        """Handle DELETE requests for a single park are
+        """Handle DELETE requests for a single park area
 
         Returns:
             Response -- 200, 404, or 500 status code
@@ -100,7 +90,7 @@ class ParkAreas(ViewSet):
         Returns:
             Response -- JSON serialized list of park areas
         """
-        areas = ParkArea.objects.all()  # This is my query to the database
+        areas = ParkArea.objects.all()
         serializer = ParkAreaSerializer(
             areas, many=True, context={'request': request})
         return Response(serializer.data)
